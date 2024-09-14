@@ -1,0 +1,165 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum WorkspaceRole {
+  Member
+  Owner
+  Admin
+}
+
+enum UserStatus {
+  Active
+  Deactivated
+}
+
+model User {
+  id String @id @default(cuid())
+
+  username String @unique @db.VarChar(255)
+  email    String @unique @db.VarChar(255)
+
+  password String?
+  status   UserStatus @default(Deactivated)
+
+  firstName          String?
+  lastName           String?
+  avatar             String?
+  currentWorkspaceId String?
+  emailVerified      Boolean   @default(false)
+  accounts           Account[]
+  title              String?
+  location           String?
+  
+  //data
+  data               Json?
+
+  // timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Workspace {
+  id     String  @id @default(cuid())
+  userId String
+  name   String  @db.VarChar(255)
+  logo   String?
+
+  members String[]
+  owners  String[]
+  admins  String[]
+
+  //data
+  data Json?
+
+  // timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+}
+
+model WorkspaceFollowing {
+  id String @id @default(cuid())
+
+  objectId String
+  userId   String
+
+  name String  @db.VarChar(255)
+  logo String?
+
+  creating Boolean
+  ownering Boolean
+  isAdmin  Boolean
+  isMember Boolean
+  
+  //data
+  data     Json?
+
+  // timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([objectId, userId])
+  @@index([userId])
+}
+
+model Invitation {
+  id String @id @default(cuid())
+
+  workspaceId     String
+  role            WorkspaceRole @default(Member)
+  email           String
+  inviteAccepted  Boolean?      @default(false)
+  expires         DateTime
+  token           String
+
+  //data
+  data Json?
+
+  // timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([workspaceId, email])
+  @@index([workspaceId])
+}
+
+model VerifyToken {
+  id         String   @id @default(cuid())
+  identifier String   @db.VarChar(255)
+  token      String   @unique @db.VarChar(32)
+  expires    DateTime
+
+  //data
+  data Json?
+
+  // timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  //workspace
+  workspaceId String
+
+  //index
+  @@unique([identifier, token])
+  @@index([workspaceId])
+  @@index([workspaceId, identifier, token])
+}
+
+model Account {
+  userId            String  @id @unique @default(cuid())
+  type              String
+  email             String
+  provider          String
+  providerAccountId String  @unique
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User[]
+}
+
+model ForgotPasswordToken {
+  id      String   @id @default(cuid())
+  userId  String   @unique
+  token   String   @unique @db.VarChar(32)
+  expires DateTime
+  //data
+  data    Json?
+
+  // timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
