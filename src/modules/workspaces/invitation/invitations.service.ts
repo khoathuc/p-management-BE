@@ -66,7 +66,7 @@ export class InvitationService {
     ) {
         const {workspace} = data;
         const workspaceName = workspace ? workspace.name : "---";
-        const verification_link = `${process.env.FRONT_END_URL}?t=${invitation.token}`;
+        const verification_link = `${process.env.FRONTEND_URL}?t=${invitation.token}`;
 
         // send email to invite
         await this._emailsService.sendEmail({

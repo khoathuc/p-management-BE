@@ -4,39 +4,46 @@ import { NestFactory, Reflector } from "@nestjs/core";
 import { AppModule } from "./app.module";
 import { configSwagger } from "@common/swagger/swagger.config";
 import { TransformInterceptor } from "@interceptors/response.interceptors";
+import * as cookieParser from 'cookie-parser';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+    const app = await NestFactory.create(AppModule, {
+        cors: {
+            credentials: true,
+            origin: [
+                process.env.FRONTEND_URL,
+                ...(process.env.MAIN_URL ? [process.env.MAIN_URL] : []),
+            ],
+        },
+    });
 
-  //swagger config
-  configSwagger(app);
+    //swagger config
+    configSwagger(app);
 
-  //global interceptors
-  app.useGlobalInterceptors(new TransformInterceptor(app.get(Reflector)));
+    //global interceptors
+    app.useGlobalInterceptors(new TransformInterceptor(app.get(Reflector)));
 
-  // Enable CORS for all origins
-  app.enableCors();
+    app.use(cookieParser());
+    // app.use(
+    //     session({
+    //         secret: process.env.SECRET_SESSION,
+    //         saveUninitialized: false,
+    //         resave: false,
+    //         cookie: {
+    //             maxAge: 60*60*1000*24*365,
+    //         }
+    //     })
+    // );
+    // app.use(passport.initialize()); // Initializes Passport for authentication
+    // app.use(passport.session()); // Middleware that enables persistent login sessions
 
-  // app.use(
-  //     session({
-  //         secret: process.env.SECRET_SESSION,
-  //         saveUninitialized: false,
-  //         resave: false,
-  //         cookie: {
-  //             maxAge: 60*60*1000*24*365,
-  //         }
-  //     })
-  // );
-  // app.use(passport.initialize()); // Initializes Passport for authentication
-  // app.use(passport.session()); // Middleware that enables persistent login sessions
+    await app.listen(process.env.PORT);
 
-  await app.listen(process.env.PORT);
-
-  //hot reload configs
-  if (module.hot) {
-    module.hot.accept();
-    module.hot.dispose(() => app.close());
-  }
+    //hot reload configs
+    if (module.hot) {
+        module.hot.accept();
+        module.hot.dispose(() => app.close());
+    }
 }
 
 bootstrap();

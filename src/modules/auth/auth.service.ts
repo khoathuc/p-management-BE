@@ -76,18 +76,13 @@ export class AuthService {
         const payload: AuthPayload = this.usersService.releasePayload(user);
 
         const accessToken = await this.jwtService.signAsync(payload, {
-            secret: process.env.ACCESS_TOKEN_KEY,
+            secret: process.env.JWT_SECRET,
             expiresIn: "1h",
-        });
-
-        const refreshToken = await this.jwtService.signAsync(payload, {
-            secret: process.env.REFRESH_TOKEN_KEY,
-            expiresIn: "7d",
         });
 
         return {
             accessToken,
-            refreshToken,
+            payload,
         };
     }
 
@@ -211,7 +206,7 @@ export class AuthService {
      * @desc send password reset email
      */
     async sendPasswordResetEmail(email: string, token: string) {
-        const resetLink = `${process.env.FRONT_END_URL}/reset-password?token=${token}`;
+        const resetLink = `${process.env.FRONTEND_URL}/reset-password?token=${token}`;
 
         await this.emailService.sendEmail({
             from: "Auth-backend service",

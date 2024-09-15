@@ -15,8 +15,8 @@ import { ApiOperation, ApiTags } from "@nestjs/swagger";
 import { UsersService } from "./users.service";
 import { User } from "@prisma/client";
 import AuthUser from "@decorators/auth.decorator";
-import { JwtAuthGuard } from "@guards/jwt.guard";
 import { ParseFile } from "@common/pipes/parse.file.pipe";
+import { AuthGuard } from "@guards/auth.guard";
 
 @Controller("users")
 @ApiTags("users")
@@ -39,6 +39,12 @@ export class UsersController {
         }
     }
 
+    @UseGuards(AuthGuard)
+    @Get("/me")
+    getMe(@AuthUser() user: User) {
+        return user;
+    }
+
     @Get(":id")
     @ApiOperation({
         summary: "Get user by id",
@@ -55,7 +61,6 @@ export class UsersController {
         }
     }
 
-
     @Post(":id/avatar")
     @ApiFile("avatar", true)
     /**
@@ -67,7 +72,7 @@ export class UsersController {
     ) {
         try {
             const user = await this.usersService.getById(id);
-            if(!user){
+            if (!user) {
                 throw new Error("Invalid user");
             }
 
@@ -99,11 +104,5 @@ export class UsersController {
                 HttpStatus.INTERNAL_SERVER_ERROR
             );
         }
-    }
-
-    @Get("/me")
-    @UseGuards(JwtAuthGuard)
-    getMe(@AuthUser() user: User) {
-        return user;
     }
 }
