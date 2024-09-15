@@ -2,25 +2,26 @@ import {
     Body,
     Controller,
     Post,
-    UseGuards,
     HttpException,
     HttpStatus,
-    Get,
+    Res,
 } from "@nestjs/common";
+import { Response } from "express";
 import { RegisterDto } from "./dto/register.dto";
 import { LoginDto } from "./dto/login.dto";
-import { LocalGuard } from "@guards/local.guard";
 import { AuthService } from "./auth.service";
-import { GoogleAuthGuard } from "src/providers/google/guards";
 import { ForgotPasswordDto } from "./dto/forgotpassword.dto";
 import { ResetPasswordDto } from "./dto/resetpassword.dto";
 import { ApiTags, ApiOperation } from "@nestjs/swagger";
+import { setAuthTokenCookie } from "@common/cookie/cookie";
+import { Public } from "@decorators/public.route.decorator";
 
 @Controller("auth")
 @ApiTags("auth")
 export class AuthController {
     constructor(private readonly authService: AuthService) {}
 
+    @Public()
     @Post("/register")
     @ApiOperation({
         summary: "Register new user",
@@ -37,15 +38,24 @@ export class AuthController {
         }
     }
 
+    @Public()
     @Post("/login")
     @ApiOperation({
         summary: "Login user",
         description: "Login user",
     })
-    @UseGuards(LocalGuard)
-    async login(@Body() loginDto: LoginDto) {
+    async login(
+        @Body() loginDto: LoginDto,
+        @Res({ passthrough: true }) response: Response
+    ) {
         try {
-            return this.authService.login(loginDto);
+            const { accessToken, payload } = await this.authService.login(
+                loginDto
+            );
+
+            setAuthTokenCookie(response, accessToken);
+
+            return { user: payload };
         } catch (error) {
             throw new HttpException(
                 error.message,
@@ -54,18 +64,7 @@ export class AuthController {
         }
     }
 
-    @Get('google/login')
-    @UseGuards(GoogleAuthGuard)
-    googleLogin() {
-        return { msg: 'Google Login' } 
-    }
-
-    @Get('google/redirect')
-    @UseGuards(GoogleAuthGuard)
-    googleRedirect() {
-        return { msg: 'Google Redirect' }
-    }
-
+    @Public()
     @Post("/forgot-password")
     @ApiOperation({
         summary: "User forgot password",
