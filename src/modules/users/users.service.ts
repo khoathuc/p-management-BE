@@ -100,4 +100,14 @@ export class UsersService {
     async deleteById(id: string) {
         return await this._userModel.deleteById(id);
     }
+
+    /**
+     * @desc update user emailVefify
+     * @param {User} user
+     * @returns
+     */
+
+    async updateEmailVerified(user: User){
+        return await this._userModel.updateEmailVerified(user.id);
+    }
 }

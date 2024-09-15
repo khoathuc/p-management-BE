@@ -129,4 +129,19 @@ export class UsersModel {
             },
         });
     }
+
+    /**
+     * @desc update user emailVefify
+     * @param {User} user
+     * @returns
+     */
+    async updateEmailVerified(id: string){
+        return await this._prismaService.user.update({
+            where: {
+                id: id,
+            }, data: {
+                emailVerified: true,
+            }
+        })
+    }
 }

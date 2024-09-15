@@ -22,7 +22,7 @@ export class AuthService {
         private jwtService: JwtService,
         private readonly usersService: UsersService,
         private emailService: EmailService
-    ) {}
+    ) { }
 
     /**
      * @desc register new user
@@ -46,13 +46,75 @@ export class AuthService {
         }
 
         // Create new user
-        return await this.usersService.create(registerDto);
+        const user = await this.usersService.create(registerDto);
 
         // TODO: create new email verify token
-
+        const emailToken = await this.generateEmailToken(registerDto.email);
         // TODO: send email verify account.
-
+        await this.sendRegisterEmailVerify(registerDto.email, emailToken.token);
         // TODO: track user register metric.
+
+        return user;
+    }
+
+    /**
+     * @desc send register email
+     */
+    async sendRegisterEmailVerify(email: string, token: string) {
+        const user = await this.usersService.getByEmail(email);
+
+        const resetLink = `${process.env.FRONT_END_URL}/auth/${user.id}/email-verify/${token}`;
+
+        await this.emailService.sendEmail({
+            from: "Auth-backend service",
+            to: email,
+            subject: "Register Request",
+            html: `<p>You requested a register. Click the link below to verify your account:</p><p><a href="${resetLink}">Register Verify</a></p>`,
+        });
+    }
+
+    /**
+     * @desc generate email token 
+     */
+    async generateEmailToken(email: string) {
+        const user = await this.usersService.getByEmail(email);
+        var expiryDate = new Date();
+        expiryDate.setHours(expiryDate.getHours() + 1);
+        const token = nanoid();
+        const emailToken = await this.prismaService.emailToken.create({
+            data: {
+                userId: user.id,
+                token: token,
+                expires: expiryDate,
+            }
+        })
+        return emailToken;
+    }
+
+    /**
+     * @desc verify email
+     * @param {string} id
+     * @param {string} token
+     * @returns
+     */
+
+    async verifyAccount(id: string, token: string) {
+        const user = await this.usersService.getById(id);
+        if (!user) throw new BadRequestException("Invalid link");
+
+        const emailToken = await this.prismaService.emailToken.findUnique({
+            where: {
+                token: token,
+            }
+        });
+        if (!emailToken) throw new BadRequestException("Invalid link");
+
+        await this.usersService.updateEmailVerified(user);
+        await this.prismaService.emailToken.delete({
+            where: {
+                userId: id,
+            }
+        })
     }
 
     /**
@@ -71,6 +133,22 @@ export class AuthService {
         const verify = await compare(data.password, user.password);
         if (!verify) {
             throw new Error("Password is incorrect");
+        }
+
+        // Check if email is verified else resend link verify
+        const emailVerified = user.emailVerified;
+        if (!emailVerified) {
+            // Delete old email token
+            await this.prismaService.emailToken.delete({
+                where: {
+                    userId: user.id,
+                }
+            })
+            // Generate email token
+            const emailToken = await this.generateEmailToken(user.email);
+            //  Send email verify 
+            await this.sendRegisterEmailVerify(user.email, emailToken.token);
+            throw new Error("Email hasn't verified yet!!!");
         }
 
         const payload: AuthPayload = this.usersService.releasePayload(user);
