@@ -5,6 +5,8 @@ import {
     HttpException,
     HttpStatus,
     Res,
+    Get,
+    Param
 } from "@nestjs/common";
 import { Response } from "express";
 import { RegisterDto } from "./dto/register.dto";
@@ -91,6 +93,23 @@ export class AuthController {
             const { resetToken, newPassword } = resetPasswordDto;
 
             return this.authService.resetPassword(newPassword, resetToken);
+        } catch (error) {
+            throw new HttpException(
+                error.message,
+                HttpStatus.INTERNAL_SERVER_ERROR
+            );
+        }
+    }
+
+    @Get(":id/email-verify/:token")
+    @ApiOperation({
+        summary: "User verify account",
+        description: "User verify account",
+    })
+    async verifyAccount(@Param("id") id: string, @Param("token") token: string) {
+
+        try {
+            await this.authService.verifyAccount(id, token);
         } catch (error) {
             throw new HttpException(
                 error.message,
