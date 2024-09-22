@@ -14,7 +14,9 @@ import { nanoid } from "nanoid";
 import { LoginDto } from "./dto/login.dto";
 import { AuthPayload } from "@interfaces/auth.payload";
 import { GoogleUserDto } from "./dto/google.user.dto";
-import { UserStatus } from "@prisma/client";
+import { User, UserStatus } from "@prisma/client";
+import { DTC } from "@shared/dtc";
+import { Token } from "@shared/token";
 @Injectable()
 export class AuthService {
     constructor(
@@ -22,7 +24,7 @@ export class AuthService {
         private jwtService: JwtService,
         private readonly usersService: UsersService,
         private emailService: EmailService
-    ) { }
+    ) {}
 
     /**
      * @desc register new user
@@ -48,10 +50,8 @@ export class AuthService {
         // Create new user
         const user = await this.usersService.create(registerDto);
 
-        // TODO: create new email verify token
-        const emailToken = await this.generateEmailToken(registerDto.email);
-        // TODO: send email verify account.
-        await this.sendRegisterEmailVerify(registerDto.email, emailToken.token);
+        await this.sendRegisterEmailVerify(user);
+
         // TODO: track user register metric.
 
         return user;
@@ -60,10 +60,10 @@ export class AuthService {
     /**
      * @desc send register email
      */
-    async sendRegisterEmailVerify(email: string, token: string) {
-        const user = await this.usersService.getByEmail(email);
-
-        const resetLink = `${process.env.FRONT_END_URL}/auth/${user.id}/email-verify/${token}`;
+    async sendRegisterEmailVerify(user) {
+        const { email } = user;
+        const emailToken = await this.generateEmailToken(user);
+        const resetLink = `${process.env.FRONT_END_URL}/auth/${user.id}/email-verify/${emailToken}`;
 
         await this.emailService.sendEmail({
             from: "Auth-backend service",
@@ -74,20 +74,18 @@ export class AuthService {
     }
 
     /**
-     * @desc generate email token 
+     * @desc generate email token
      */
-    async generateEmailToken(email: string) {
-        const user = await this.usersService.getByEmail(email);
-        var expiryDate = new Date();
-        expiryDate.setHours(expiryDate.getHours() + 1);
-        const token = nanoid();
+    async generateEmailToken(user: User) {
+        
         const emailToken = await this.prismaService.emailToken.create({
             data: {
                 userId: user.id,
-                token: token,
-                expires: expiryDate,
-            }
-        })
+                token: Token.generate(),
+                expires: DTC.nextDays(1),
+            },
+        });
+
         return emailToken;
     }
 
@@ -105,7 +103,7 @@ export class AuthService {
         const emailToken = await this.prismaService.emailToken.findUnique({
             where: {
                 token: token,
-            }
+            },
         });
         if (!emailToken) throw new BadRequestException("Invalid link");
 
@@ -113,8 +111,8 @@ export class AuthService {
         await this.prismaService.emailToken.delete({
             where: {
                 userId: id,
-            }
-        })
+            },
+        });
     }
 
     /**
@@ -138,17 +136,7 @@ export class AuthService {
         // Check if email is verified else resend link verify
         const emailVerified = user.emailVerified;
         if (!emailVerified) {
-            // Delete old email token
-            await this.prismaService.emailToken.delete({
-                where: {
-                    userId: user.id,
-                }
-            })
-            // Generate email token
-            const emailToken = await this.generateEmailToken(user.email);
-            //  Send email verify 
-            await this.sendRegisterEmailVerify(user.email, emailToken.token);
-            throw new Error("Email hasn't verified yet!!!");
+            throw new Error("Your email is not verified");
         }
 
         const payload: AuthPayload = this.usersService.releasePayload(user);
