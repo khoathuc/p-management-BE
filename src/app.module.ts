@@ -1,12 +1,13 @@
-import { Module, ValidationPipe } from '@nestjs/common';
+import { Module, Scope, ValidationPipe } from '@nestjs/common';
 import { PrismaModule } from '@db/prisma.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
 import { JwtModule } from '@nestjs/jwt';
-import { APP_GUARD, APP_PIPE } from '@nestjs/core';
+import { APP_GUARD, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
 import { PassportModule } from "@nestjs/passport";
 import { WorkspaceModule } from '@modules/workspaces/workspaces.module';
 import { AuthGuard } from '@guards/auth.guard';
+import { LoggingInterceptor } from '@providers/logger/logging.interceptor';
 @Module({
   imports: [
     AuthModule,
@@ -25,6 +26,11 @@ import { AuthGuard } from '@guards/auth.guard';
       provide: APP_GUARD,
       useClass: AuthGuard,
     },
+    {
+      provide: APP_INTERCEPTOR,
+      scope: Scope.REQUEST,
+      useClass: LoggingInterceptor
+    }
   ],
 })
 export class AppModule { }
