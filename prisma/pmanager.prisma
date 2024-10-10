@@ -1,0 +1,216 @@
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+enum ChecklistStatus {
+    NotDone
+    Done
+}
+
+model ProjectFollowing {
+    id       String @id @default(cuid())
+    userId   String
+    objectId String
+
+    name  String @db.VarChar(255)
+    image Json?
+
+    ownering   Boolean
+    creating   Boolean
+    isAdmin    Boolean
+    isStarring Boolean
+    isMember   Boolean
+
+    // data
+    data Json?
+
+    // workspace
+    spaceId String
+
+    // timestamps
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    // index
+    @@unique([spaceId, userId, objectId])
+    @@index([spaceId])
+}
+
+model Project {
+    id     String @id @default(cuid())
+    userId String
+
+    name        String  @db.VarChar(255)
+    description String? @db.Text()
+    image       Json?
+
+    members String[]
+    owners  String[]
+    admins  String[]
+    starred String[]
+
+    labels Label[]
+    cform  Json[]
+
+    // data
+    data Json?
+
+    // workspace
+    spaceId String
+
+    // timestamps
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    // relations
+    TaskList TaskList[]
+
+    // index
+    @@index([spaceId])
+}
+
+model TaskList {
+    id        String @id @default(cuid())
+    userId    String
+    projectId String
+
+    name  String @db.VarChar(255)
+    color String @db.VarChar(255)
+    order Int    @default(0)
+
+    // data
+    data Json?
+
+    // workspace
+    spaceId String
+
+    // timestamps
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    // relations
+    project Project @relation(fields: [projectId], references: [id])
+    Task    Task[]
+
+    // index
+    @@index([spaceId])
+    @@index([spaceId, projectId])
+}
+
+model Task {
+    id         String @id @default(cuid())
+    userId     String
+    tasklistId String
+
+    name        String  @db.VarChar(255)
+    description String? @db.Text()
+    image       Json?
+
+    order Int @default(0)
+
+    checklists Checklist[]
+    labels     Json[]
+    cform      Json[]
+    files      Json[]
+
+    followers String[]
+    assigners String[]
+
+    // datetime
+    startDate    DateTime?
+    dueDate      DateTime?
+    reminderDate DateTime?
+
+    // log
+    logs Json[]
+
+    // data
+    data Json?
+
+    // workspace
+    spaceId String
+
+    // timestamps
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    // relations
+    tasklist TaskList @relation(fields: [tasklistId], references: [id])
+
+    // index
+    @@index([spaceId])
+    @@index([spaceId, tasklistId])
+}
+
+model Checklist {
+    id     String  @id @default(cuid())
+    userId String
+    taskId String?
+
+    name   String          @db.VarChar(255)
+    status ChecklistStatus @default(NotDone)
+
+    order Int @default(0)
+
+    // data
+    data Json?
+
+    // workspace
+    spaceId String
+
+    // timestamps
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    // relations
+    Task Task? @relation(fields: [taskId], references: [id])
+
+    // index
+    @@index([spaceId])
+    @@index([spaceId, taskId])
+}
+
+model Label {
+    id        String  @id @default(cuid())
+    userId    String
+    projectId String?
+
+    // data
+    data Json?
+
+    // workspace
+    spaceId String
+
+    // timestamps
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    // relations
+    Project Project? @relation(fields: [projectId], references: [id])
+
+    // index
+    @@index([spaceId])
+}
+
+model Comments {
+    id     String @id @default(cuid())
+    userId String
+
+    // data
+    data Json?
+
+    // workspace
+    spaceId String
+
+    // timestamps
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    // index
+    @@index([spaceId])
+}
