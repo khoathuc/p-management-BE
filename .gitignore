@@ -4,6 +4,8 @@
 /build
 /uploads
 pnpm-lock.yaml
+/log
+/prisma/generated
 
 # Logs
 logs

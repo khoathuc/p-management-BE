@@ -6,7 +6,7 @@ import {
     InternalServerErrorException,
     UnauthorizedException,
 } from "@nestjs/common";
-import { PrismaService } from "@db/prisma.service";
+import { PrismaBaseService } from "@db/prisma.base.service";
 import { compare } from "bcrypt";
 import { JwtService } from "@nestjs/jwt";
 import { UsersService } from "@modules/users/users.service";
@@ -20,7 +20,7 @@ import { Token } from "@shared/token";
 @Injectable()
 export class AuthService {
     constructor(
-        private prismaService: PrismaService,
+        private prismaService: PrismaBaseService,
         private jwtService: JwtService,
         private readonly usersService: UsersService,
         private emailService: EmailService
