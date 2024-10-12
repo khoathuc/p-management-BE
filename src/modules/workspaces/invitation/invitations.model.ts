@@ -1,10 +1,10 @@
-import { PrismaService } from "@db/prisma.base.service";
+import { PrismaBaseService } from "@db/prisma.base.service";
 import { Injectable } from "@nestjs/common";
 import { Invitation } from "@prisma/client";
 
 @Injectable()
 export class InvitationsModel {
-    constructor(private _prismaService: PrismaService) {}
+    constructor(private _prismaService: PrismaBaseService) {}
 
     /**
      * @desc get all invitations
