@@ -1,11 +1,11 @@
-import { PrismaService } from "@db/prisma.service";
+import { PrismaBaseService } from "@db/prisma.base.service";
 import { Workspace } from "@prisma/client";
 import { Injectable } from "@nestjs/common";
 import { CreateWorkspaceDto } from "./dto/create.workspace.dto";
 import { UpdateWorkspaceDto } from "./dto/update.workspace.dto";
 @Injectable()
 export class WorkspacesModel {
-    constructor(private _prismaService: PrismaService) {}
+    constructor(private _prismaService: PrismaBaseService) {}
 
     /**
      * @desc delete a workspace

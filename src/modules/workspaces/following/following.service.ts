@@ -1,4 +1,4 @@
-import { PrismaService } from "@db/prisma.service";
+import { PrismaBaseService } from "@db/prisma.base.service";
 import { Injectable } from "@nestjs/common";
 import { User, Workspace } from "@prisma/client";
 import { ARR } from "@shared/array";
@@ -15,7 +15,7 @@ export class WorkspacesFollowingService
 {
     constructor(
         private _usersService: UsersService,
-        private _prismaService: PrismaService
+        private _prismaService: PrismaBaseService
     ) {
         super(_prismaService.workspaceFollowing);
     }

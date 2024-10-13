@@ -1,4 +1,4 @@
-import { PrismaService } from "@db/prisma.service";
+import { PrismaBaseService } from "@db/prisma.base.service";
 import { Injectable } from "@nestjs/common";
 import { Crypt } from "@shared/crypt";
 import { RegisterDto } from "@modules/auth/dto/register.dto";
@@ -8,7 +8,7 @@ import { AuthPayload } from "@interfaces/auth.payload";
 
 @Injectable()
 export class UsersModel {
-    constructor(private _prismaService: PrismaService) { }
+    constructor(private _prismaService: PrismaBaseService) { }
 
     /**
      * @desc delete an user

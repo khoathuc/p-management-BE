@@ -1,4 +1,4 @@
-import { PrismaService } from "@db/prisma.service";
+import { PrismaBaseService } from "@db/prisma.base.service";
 import { AuthService } from "@modules/auth/auth.service";
 import { Injectable } from "@nestjs/common";
 import { PassportSerializer } from "@nestjs/passport";
@@ -6,7 +6,7 @@ import { User } from "@prisma/client";
 
 @Injectable()
 export class SessionSerializer extends PassportSerializer {
-    constructor(private authService: AuthService, private prismaService: PrismaService) {
+    constructor(private authService: AuthService, private prismaService: PrismaBaseService) {
         super();
     }
 
