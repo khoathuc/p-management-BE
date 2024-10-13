@@ -18,13 +18,15 @@ import { ApiTags, ApiOperation } from "@nestjs/swagger";
 import { setAuthTokenCookie } from "@common/cookie/cookie";
 import { Public } from "@decorators/public.route.decorator";
 import { WorkspacesService } from "@modules/workspaces/workspaces.service";
+import { UsersService } from "@modules/users/users.service";
 
 @Controller("auth")
 @ApiTags("auth")
 export class AuthController {
     constructor(
         private readonly authService: AuthService,
-        private readonly _workspaceService: WorkspacesService
+        private readonly _workspaceService: WorkspacesService,
+        private readonly _userService: UsersService
     ) {}
 
     @Public()
@@ -118,10 +120,19 @@ export class AuthController {
         @Res({ passthrough: true }) response: Response
     ) {
         try {
-            const user = await this.authService.verifyAccount(id, token);
+            let user = await this.authService.verifyAccount(id, token);
 
-            const workspace = await this._workspaceService.create;
+            // Create default workspace if user verify success.
+            const workspace =
+                await this._workspaceService.createUserDefaultWorkspace(user);
 
+            // Update user current workspace.
+            user = await this._userService.updateCurrentWorkspace(
+                user,
+                workspace
+            );
+
+            // Release authtoken and save to cookie
             const { accessToken, payload } =
                 await this.authService.releaseToken(user);
 

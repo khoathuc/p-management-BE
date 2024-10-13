@@ -21,17 +21,17 @@ export class CreateWorkspaceDto {
     @IsArray()
     @IsString({ each: true })
     @ApiPropertyOptional()
-    members: string[];
+    members?: string[];
 
     @IsOptional()
     @IsArray()
     @IsString({ each: true })
     @ApiPropertyOptional()
-    owners: string[];
+    owners?: string[];
 
     @IsOptional()
     @IsArray()
     @IsString({ each: true })
     @ApiPropertyOptional()
-    admins: string[];
+    admins?: string[];
 }

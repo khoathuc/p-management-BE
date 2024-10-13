@@ -2,13 +2,12 @@ import { PrismaBaseService } from "@db/prisma.base.service";
 import { Injectable } from "@nestjs/common";
 import { Crypt } from "@shared/crypt";
 import { RegisterDto } from "@modules/auth/dto/register.dto";
-import { User } from "@prisma/base";
+import { User, Workspace } from "@prisma/base";
 import { UserStatus } from "@prisma/base";
-import { AuthPayload } from "@interfaces/auth.payload";
 
 @Injectable()
 export class UsersModel {
-    constructor(private _prismaService: PrismaBaseService) { }
+    constructor(private _prismaService: PrismaBaseService) {}
 
     /**
      * @desc delete an user
@@ -35,8 +34,8 @@ export class UsersModel {
             },
             data: {
                 password: await Crypt.hash(newPassword, 10),
-            }
-        })
+            },
+        });
     }
 
     /**
@@ -54,8 +53,8 @@ export class UsersModel {
                 password: hashedPassword,
                 status: UserStatus.Active,
                 emailVerified: false,
-            }
-        })
+            },
+        });
     }
 
     /**
@@ -74,11 +73,11 @@ export class UsersModel {
      */
     async uploadAvatar(id: string, avatarUrl: string): Promise<User> {
         return this._prismaService.user.update({
-            where: { 
-                id: id 
+            where: {
+                id: id,
             },
-            data: { 
-                avatar: avatarUrl 
+            data: {
+                avatar: avatarUrl,
             },
         });
     }
@@ -102,9 +101,9 @@ export class UsersModel {
     async getByEmail(email: string): Promise<User> {
         return await this._prismaService.user.findUnique({
             where: {
-                email
-            }
-        })
+                email,
+            },
+        });
     }
 
     /**
@@ -113,12 +112,14 @@ export class UsersModel {
      * @return {User[]}
      */
     async getByIds(ids: string[]): Promise<User[]> {
-        return await this._prismaService.user.findMany({ where: { id: { in: ids } } });
+        return await this._prismaService.user.findMany({
+            where: { id: { in: ids } },
+        });
     }
 
     /**
      * @desc get user by username or email.
-     * @param { } email 
+     * @param { } email
      * @param { } username
      * @returns
      */
@@ -135,13 +136,31 @@ export class UsersModel {
      * @param {User} user
      * @returns
      */
-    async updateEmailVerified(id: string){
+    async updateEmailVerified(id: string) {
         return await this._prismaService.user.update({
             where: {
                 id: id,
-            }, data: {
+            },
+            data: {
                 emailVerified: true,
-            }
-        })
+            },
+        });
+    }
+
+    /**
+     * @desc update user current workspace
+     * @param {User} user
+     * @param workspace 
+     * @returns 
+     */
+    async updateCurrentWorkspace(user: User, workspace: Workspace) {
+        return await this._prismaService.user.update({
+            where: {
+                id: user.id,
+            },
+            data: {
+                currentWorkspaceId: workspace.id,
+            },
+        });
     }
 }

@@ -1,7 +1,7 @@
 import { AuthPayload } from "@interfaces/auth.payload";
 import { RegisterDto } from "@modules/auth/dto/register.dto";
 import { Injectable } from "@nestjs/common";
-import { User, UserStatus } from "@prisma/base";
+import { User, UserStatus, Workspace } from "@prisma/base";
 import { UsersModel } from "./users.model";
 import { OBJ } from "@shared/object";
 
@@ -19,7 +19,7 @@ export class UsersService {
             "lastName",
             "username",
             "email",
-            "currentWorkspaceId"
+            "currentWorkspaceId",
         ]);
     }
 
@@ -109,7 +109,17 @@ export class UsersService {
      * @returns
      */
 
-    async updateEmailVerified(user: User){
+    async updateEmailVerified(user: User) {
         return await this._userModel.updateEmailVerified(user.id);
+    }
+
+    /**
+     * @desc update current user's workspace
+     * @param {User} user
+     * @param {Workspace} workspace
+     * @returns
+     */
+    async updateCurrentWorkspace(user: User, workspace: Workspace) {
+        return await this._userModel.updateCurrentWorkspace(user, workspace);
     }
 }

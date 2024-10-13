@@ -76,17 +76,26 @@ export class WorkspacesService {
         await this._fs.remove(workspace);
     }
 
-
     /**
      * @desc Create default user's workspace
      * @return {Workspace}
      */
-    async createUserDefaultWorkspace(user: User){
-        const workspace = await this._workspacesModel.create(workspaceDto);
+    async createUserDefaultWorkspace(user: User) {
+        const workspace = await this._workspacesModel.create({
+            userId: user.id,
+            name: this.getUserDefaultWorkspaceName(user),
+            members: [user.id],
+            owners: [user.id],
+            admins: [user.id],
+        });
 
         // Create workspace following
         await this._fs.init(workspace);
 
         return workspace;
+    }
+
+    private getUserDefaultWorkspaceName(user: User): string {
+        return `${user.firstName} ${user.lastName}'s Workspace`;
     }
 }
