@@ -13,6 +13,8 @@
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
     "email:dev": "email dev -p 3002 -d src/providers/email/tpls",
+    "prisma:update:base": "prisma db push --schema=prisma/base.prisma && prisma generate --schema=prisma/base.prisma",
+    "prisma:update:pmanager": "prisma db push --schema=prisma/pmanager.prisma && prisma generate --schema=prisma/pmanager.prisma",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "test": "jest",
     "test:watch": "jest --watch",
