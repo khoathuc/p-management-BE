@@ -6,7 +6,7 @@ import {
     HttpStatus,
     Res,
     Get,
-    Param
+    Param,
 } from "@nestjs/common";
 import { Response } from "express";
 import { RegisterDto } from "./dto/register.dto";
@@ -83,6 +83,7 @@ export class AuthController {
         }
     }
 
+    @Public()
     @Post("/reset-password")
     @ApiOperation({
         summary: "User reset password",
@@ -101,15 +102,26 @@ export class AuthController {
         }
     }
 
+    @Public()
     @Get(":id/email-verify/:token")
     @ApiOperation({
         summary: "User verify account",
         description: "User verify account",
     })
-    async verifyAccount(@Param("id") id: string, @Param("token") token: string) {
-
+    async verifyAccount(
+        @Param("id") id: string,
+        @Param("token") token: string,
+        @Res({ passthrough: true }) response: Response
+    ) {
         try {
-            await this.authService.verifyAccount(id, token);
+            const user = await this.authService.verifyAccount(id, token);
+
+            const { accessToken, payload } =
+                await this.authService.releaseToken(user);
+
+            setAuthTokenCookie(response, accessToken);
+
+            return { user: payload };
         } catch (error) {
             throw new HttpException(
                 error.message,

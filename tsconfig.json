@@ -20,7 +20,6 @@
       "@decorators/*": ["./src/decorators/*"],
       "@providers/*": ["./src/providers/*"],
       "@shared/*": ["./src/shared/*"],
-      "@email/*": ["./email/*"],
       "@guards/*": ["./src/guards/*"],
     },
     "incremental": true,

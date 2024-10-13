@@ -77,7 +77,6 @@ export class AuthService {
      * @desc generate email token
      */
     async generateEmailToken(user: User) {
-        
         const emailToken = await this.prismaService.emailToken.create({
             data: {
                 userId: user.id,
@@ -113,6 +112,8 @@ export class AuthService {
                 userId: id,
             },
         });
+
+        return user;
     }
 
     /**
@@ -146,6 +147,16 @@ export class AuthService {
             expiresIn: "1h",
         });
 
+        return await this.releaseToken(user);
+    }
+
+    async releaseToken(user: User) {
+        const payload: AuthPayload = this.usersService.releasePayload(user);
+
+        const accessToken = await this.jwtService.signAsync(payload, {
+            secret: process.env.JWT_SECRET,
+            expiresIn: "1h",
+        });
         return {
             accessToken,
             payload,

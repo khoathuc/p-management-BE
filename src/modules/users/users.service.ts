@@ -19,8 +19,10 @@ export class UsersService {
             "lastName",
             "username",
             "email",
+            "currentWorkspaceId"
         ]);
     }
+    
     /**
      * @desc get all users
      * @returns
