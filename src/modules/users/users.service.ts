@@ -1,7 +1,7 @@
 import { AuthPayload } from "@interfaces/auth.payload";
 import { RegisterDto } from "@modules/auth/dto/register.dto";
 import { Injectable } from "@nestjs/common";
-import { User, UserStatus } from "@prisma/client";
+import { User, UserStatus } from "@prisma/base";
 import { UsersModel } from "./users.model";
 import { OBJ } from "@shared/object";
 
@@ -22,7 +22,7 @@ export class UsersService {
             "currentWorkspaceId"
         ]);
     }
-    
+
     /**
      * @desc get all users
      * @returns

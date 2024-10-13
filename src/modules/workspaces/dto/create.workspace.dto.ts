@@ -17,16 +17,19 @@ export class CreateWorkspaceDto {
     @ApiPropertyOptional()
     logo?: string;
 
+    @IsOptional()
     @IsArray()
     @IsString({ each: true })
     @ApiPropertyOptional()
     members: string[];
 
+    @IsOptional()
     @IsArray()
     @IsString({ each: true })
     @ApiPropertyOptional()
     owners: string[];
 
+    @IsOptional()
     @IsArray()
     @IsString({ each: true })
     @ApiPropertyOptional()

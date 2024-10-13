@@ -1,6 +1,6 @@
 import { PrismaBaseService } from "@db/prisma.base.service";
 import { Injectable } from "@nestjs/common";
-import { User, Workspace } from "@prisma/client";
+import { User, Workspace } from "@prisma/base";
 import { ARR } from "@shared/array";
 import {
     AbstractFollowingsService,

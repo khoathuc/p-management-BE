@@ -5,7 +5,7 @@ import {
     IsNotEmpty,
     IsString,
 } from "class-validator";
-import { WorkspaceRole } from "@prisma/client";
+import { WorkspaceRole } from "@prisma/base";
 
 export class CreateWorkspaceInvitationDto {
     @IsString()

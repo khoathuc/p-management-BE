@@ -1,5 +1,5 @@
 import { UsersService } from "@modules/users/users.service";
-import { User } from "@prisma/client";
+import { User } from "@prisma/base";
 import { ARR } from "@shared/array";
 
 export interface IFollowingsService<T extends { id: string }> {

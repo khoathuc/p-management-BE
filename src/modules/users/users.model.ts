@@ -2,8 +2,8 @@ import { PrismaBaseService } from "@db/prisma.base.service";
 import { Injectable } from "@nestjs/common";
 import { Crypt } from "@shared/crypt";
 import { RegisterDto } from "@modules/auth/dto/register.dto";
-import { User } from "@prisma/client";
-import { UserStatus } from "@prisma/client";
+import { User } from "@prisma/base";
+import { UserStatus } from "@prisma/base";
 import { AuthPayload } from "@interfaces/auth.payload";
 
 @Injectable()

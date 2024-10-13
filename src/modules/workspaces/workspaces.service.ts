@@ -1,10 +1,10 @@
 import { Injectable } from "@nestjs/common";
 import { WorkspacesFollowingService } from "./following/following.service";
-import { Workspace } from "@prisma/client";
 import { WorkspacesModel } from "./workspaces.model";
 import { CreateWorkspaceDto } from "./dto/create.workspace.dto";
 import { UpdateWorkspaceDto } from "./dto/update.workspace.dto";
 import { OBJ } from "@shared/object";
+import { User, Workspace } from "@prisma/base";
 
 @Injectable()
 export class WorkspacesService {
@@ -74,5 +74,19 @@ export class WorkspacesService {
 
         // Remove following
         await this._fs.remove(workspace);
+    }
+
+
+    /**
+     * @desc Create default user's workspace
+     * @return {Workspace}
+     */
+    async createUserDefaultWorkspace(user: User){
+        const workspace = await this._workspacesModel.create(workspaceDto);
+
+        // Create workspace following
+        await this._fs.init(workspace);
+
+        return workspace;
     }
 }

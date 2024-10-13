@@ -1,5 +1,5 @@
 import { PrismaBaseService } from "@db/prisma.base.service";
-import { Workspace } from "@prisma/client";
+import { Workspace } from "@prisma/base";
 import { Injectable } from "@nestjs/common";
 import { CreateWorkspaceDto } from "./dto/create.workspace.dto";
 import { UpdateWorkspaceDto } from "./dto/update.workspace.dto";

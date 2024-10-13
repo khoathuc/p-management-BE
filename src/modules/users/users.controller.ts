@@ -13,7 +13,7 @@ import {
 import { ApiFile } from "@decorators/api.file.decorator";
 import { ApiOperation, ApiTags } from "@nestjs/swagger";
 import { UsersService } from "./users.service";
-import { User } from "@prisma/client";
+import { User } from "@prisma/base";
 import AuthUser from "@decorators/auth.decorator";
 import { ParseFile } from "@common/pipes/parse.file.pipe";
 import { AuthGuard } from "@guards/auth.guard";

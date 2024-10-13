@@ -21,6 +21,7 @@
       "@providers/*": ["./src/providers/*"],
       "@shared/*": ["./src/shared/*"],
       "@guards/*": ["./src/guards/*"],
+      "@prisma/*": ["./prisma/generated/*"],
     },
     "incremental": true,
     "skipLibCheck": true,

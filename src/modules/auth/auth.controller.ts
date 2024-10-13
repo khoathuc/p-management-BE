@@ -17,11 +17,15 @@ import { ResetPasswordDto } from "./dto/resetpassword.dto";
 import { ApiTags, ApiOperation } from "@nestjs/swagger";
 import { setAuthTokenCookie } from "@common/cookie/cookie";
 import { Public } from "@decorators/public.route.decorator";
+import { WorkspacesService } from "@modules/workspaces/workspaces.service";
 
 @Controller("auth")
 @ApiTags("auth")
 export class AuthController {
-    constructor(private readonly authService: AuthService) {}
+    constructor(
+        private readonly authService: AuthService,
+        private readonly _workspaceService: WorkspacesService
+    ) {}
 
     @Public()
     @Post("/register")
@@ -115,6 +119,8 @@ export class AuthController {
     ) {
         try {
             const user = await this.authService.verifyAccount(id, token);
+
+            const workspace = await this._workspaceService.create;
 
             const { accessToken, payload } =
                 await this.authService.releaseToken(user);

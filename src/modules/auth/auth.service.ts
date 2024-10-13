@@ -14,7 +14,7 @@ import { nanoid } from "nanoid";
 import { LoginDto } from "./dto/login.dto";
 import { AuthPayload } from "@interfaces/auth.payload";
 import { GoogleUserDto } from "./dto/google.user.dto";
-import { User, UserStatus } from "@prisma/client";
+import { User, UserStatus } from "@prisma/base";
 import { DTC } from "@shared/dtc";
 import { Token } from "@shared/token";
 @Injectable()
