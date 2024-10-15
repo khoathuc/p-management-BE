@@ -16,12 +16,15 @@ import { UsersService } from "./users.service";
 import { User } from "@prisma/base";
 import AuthUser from "@decorators/auth.decorator";
 import { ParseFile } from "@common/pipes/parse.file.pipe";
-import { AuthGuard } from "@guards/auth.guard";
+import { ContextService } from "@providers/context/context.service";
 
 @Controller("users")
 @ApiTags("users")
 export class UsersController {
-    constructor(private readonly usersService: UsersService) {}
+    constructor(
+        private readonly usersService: UsersService,
+        private _ctxService: ContextService
+    ) {}
 
     @Get()
     @ApiOperation({
@@ -39,10 +42,10 @@ export class UsersController {
         }
     }
 
-    @UseGuards(AuthGuard)
     @Get("/me")
-    getMe(@AuthUser() user: User) {
-        return user;
+    getMe() {
+        const user = this._ctxService.getUser();
+        return this.usersService.releasePayload(user);
     }
 
     @Get(":id")

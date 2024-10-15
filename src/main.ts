@@ -17,25 +17,14 @@ async function bootstrap() {
         },
     });
 
-    //swagger config
+    // Swagger config
     configSwagger(app);
 
-    //global interceptors
+    // Global interceptors
     app.useGlobalInterceptors(new TransformInterceptor(app.get(Reflector)));
 
+    // Cookie parser
     app.use(cookieParser());
-    // app.use(
-    //     session({
-    //         secret: process.env.SECRET_SESSION,
-    //         saveUninitialized: false,
-    //         resave: false,
-    //         cookie: {
-    //             maxAge: 60*60*1000*24*365,
-    //         }
-    //     })
-    // );
-    // app.use(passport.initialize()); // Initializes Passport for authentication
-    // app.use(passport.session()); // Middleware that enables persistent login sessions
 
     await app.listen(process.env.PORT);
 

@@ -1,5 +1,5 @@
 import { PrismaBaseService } from "@db/prisma.base.service";
-import { Workspace } from "@prisma/base";
+import { User, Workspace } from "@prisma/base";
 import { Injectable } from "@nestjs/common";
 import { CreateWorkspaceDto } from "./dto/create.workspace.dto";
 import { UpdateWorkspaceDto } from "./dto/update.workspace.dto";
@@ -21,7 +21,7 @@ export class WorkspacesModel {
      * @desc get all workspaces
      * @returns
      */
-    async getAll() {
+    async getAll(user: User) {
         return await this._prismaService.workspace.findMany();
     }
 
@@ -40,9 +40,10 @@ export class WorkspacesModel {
      * @desc create new workspace
      * @param data
      */
-    async create(data: CreateWorkspaceDto): Promise<Workspace> {
+    async create(user: User, data: CreateWorkspaceDto): Promise<Workspace> {
         return await this._prismaService.workspace.create({
             data: {
+                userId: user.id,
                 ...data,
             },
         });

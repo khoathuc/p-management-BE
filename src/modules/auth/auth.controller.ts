@@ -16,7 +16,6 @@ import { ForgotPasswordDto } from "./dto/forgotpassword.dto";
 import { ResetPasswordDto } from "./dto/resetpassword.dto";
 import { ApiTags, ApiOperation } from "@nestjs/swagger";
 import { setAuthTokenCookie } from "@common/cookie/cookie";
-import { Public } from "@decorators/public.route.decorator";
 import { WorkspacesService } from "@modules/workspaces/workspaces.service";
 import { UsersService } from "@modules/users/users.service";
 
@@ -29,7 +28,6 @@ export class AuthController {
         private readonly _userService: UsersService
     ) {}
 
-    @Public()
     @Post("/register")
     @ApiOperation({
         summary: "Register new user",
@@ -46,7 +44,6 @@ export class AuthController {
         }
     }
 
-    @Public()
     @Post("/login")
     @ApiOperation({
         summary: "Login user",
@@ -72,7 +69,6 @@ export class AuthController {
         }
     }
 
-    @Public()
     @Post("/forgot-password")
     @ApiOperation({
         summary: "User forgot password",
@@ -89,7 +85,6 @@ export class AuthController {
         }
     }
 
-    @Public()
     @Post("/reset-password")
     @ApiOperation({
         summary: "User reset password",
@@ -108,7 +103,6 @@ export class AuthController {
         }
     }
 
-    @Public()
     @Get(":id/email-verify/:token")
     @ApiOperation({
         summary: "User verify account",

@@ -2,11 +2,6 @@ import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import { IsArray, IsNotEmpty, IsOptional, IsString } from "class-validator"
 
 export class CreateWorkspaceDto {
-    @IsString()
-    @IsNotEmpty()
-    @ApiProperty()
-    userId: string
-
     @IsNotEmpty()
     @IsString()
     @ApiProperty()
