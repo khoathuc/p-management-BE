@@ -140,13 +140,6 @@ export class AuthService {
             throw new Error("Your email is not verified");
         }
 
-        const payload: AuthPayload = this.usersService.releasePayload(user);
-
-        const accessToken = await this.jwtService.signAsync(payload, {
-            secret: process.env.JWT_SECRET,
-            expiresIn: "1h",
-        });
-
         return await this.releaseToken(user);
     }
 
@@ -157,9 +150,9 @@ export class AuthService {
             secret: process.env.JWT_SECRET,
             expiresIn: "1h",
         });
+        
         return {
             accessToken,
-            payload,
         };
     }
 
