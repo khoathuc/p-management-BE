@@ -48,9 +48,13 @@ export class AuthService {
         }
 
         // Create new user
-        const user = await this.usersService.create(registerDto);
+        let user = await this.usersService.create(registerDto);
 
-        await this.sendRegisterEmailVerify(user);
+        //TODO: (remove)temporary update email verify to true.
+        user = await this.usersService.updateEmailVerified(user);
+
+        //TODO: re-make logic verify email
+        // await this.sendRegisterEmailVerify(user);
 
         // TODO: track user register metric.
 

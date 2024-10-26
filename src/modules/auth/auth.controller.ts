@@ -34,7 +34,16 @@ export class AuthController {
     })
     async register(@Body() registerDto: RegisterDto) {
         try {
-            return await this._authService.register(registerDto);
+            let user = await this._authService.register(registerDto);
+
+            // TODO: remove this logic in register - we do this logic in verify account
+            // Create default workspace if user verify success.
+            let workspace =
+                await this._workspaceService.createUserDefaultWorkspace(user);
+
+            user = await this._userService.updateCurrentWorkspace(user, workspace);
+
+            return {user}
         } catch (error) {
             throw new HttpException(
                 error.message,
