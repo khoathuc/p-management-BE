@@ -18,6 +18,7 @@ import { ApiOperation, ApiParam, ApiTags } from "@nestjs/swagger";
 import AuthUser from "@decorators/auth.decorator";
 import { SpaceRoles } from "@decorators/workspace.role.decorator";
 import { WorkspaceRole } from "@prisma/base";
+import CurrentWorkspace from "@decorators/workspace.decorator";
 
 @Controller("workspaces")
 @ApiTags("workspaces")
@@ -51,6 +52,15 @@ export class WorkspaceController {
                 HttpStatus.INTERNAL_SERVER_ERROR
             );
         }
+    }
+
+    @Get()
+    @ApiOperation({
+        summary: "Get current workspace",
+        description: "Get current workspace in session",
+    })
+    async getCurrentWorkspace(@CurrentWorkspace() workspace) {
+        return { workspace };
     }
 
     @Get()
@@ -90,7 +100,6 @@ export class WorkspaceController {
         }
     }
 
-    
     @Patch(":id")
     @SpaceRoles(WorkspaceRole.Admin)
     @ApiOperation({

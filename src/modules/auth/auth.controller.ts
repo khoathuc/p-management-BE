@@ -7,6 +7,7 @@ import {
     Res,
     Get,
     Param,
+    Session,
 } from "@nestjs/common";
 import { Response } from "express";
 import { RegisterDto } from "./dto/register.dto";
@@ -41,9 +42,12 @@ export class AuthController {
             let workspace =
                 await this._workspaceService.createUserDefaultWorkspace(user);
 
-            user = await this._userService.updateCurrentWorkspace(user, workspace);
+            user = await this._userService.updateCurrentWorkspace(
+                user,
+                workspace
+            );
 
-            return {user}
+            return { user };
         } catch (error) {
             throw new HttpException(
                 error.message,
@@ -68,6 +72,35 @@ export class AuthController {
         } catch (error) {
             throw new HttpException(
                 error.message,
+                HttpStatus.INTERNAL_SERVER_ERROR
+            );
+        }
+    }
+
+    @Post("/logout")
+    @ApiOperation({
+        summary: "Logout user",
+        description: "Logs out the user by clearing the session.",
+    })
+    async logout(
+        @Session() session,
+        @Res({ passthrough: true }) response: Response
+    ) {
+        try {
+            // Destroy the session
+            session.destroy((err) => {
+                if (err) {
+                    throw new HttpException(
+                        "Failed to logout",
+                        HttpStatus.INTERNAL_SERVER_ERROR
+                    );
+                }
+            });
+
+            return { message: "User logged out successfully" };
+        } catch (error) {
+            throw new HttpException(
+                "Failed to logout",
                 HttpStatus.INTERNAL_SERVER_ERROR
             );
         }
