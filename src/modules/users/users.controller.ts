@@ -9,23 +9,29 @@ import {
     UseGuards,
     Post,
     UploadedFile,
+    Session,
 } from "@nestjs/common";
 import { ApiFile } from "@decorators/api.file.decorator";
 import { ApiOperation, ApiTags } from "@nestjs/swagger";
 import { UsersService } from "./users.service";
 import { User } from "@prisma/base";
-import AuthUser from "@decorators/auth.decorator";
 import { ParseFile } from "@common/pipes/parse.file.pipe";
-import { ContextService } from "@providers/context/context.service";
+import AuthUser from "@decorators/auth.decorator";
 
 @Controller("users")
 @ApiTags("users")
 export class UsersController {
-    constructor(
-        private readonly usersService: UsersService,
-        private _ctxService: ContextService
-    ) {}
+    constructor(private readonly usersService: UsersService) {}
 
+    @Get("/me")
+    @ApiOperation({
+        summary: "Get current user",
+        description: "Get current user",
+    })
+    getMe(@AuthUser() user){
+        return this.usersService.releasePayload(user);
+    }
+    
     @Get()
     @ApiOperation({
         summary: "Get all users",
@@ -40,12 +46,6 @@ export class UsersController {
                 HttpStatus.INTERNAL_SERVER_ERROR
             );
         }
-    }
-
-    @Get("/me")
-    getMe() {
-        const user = this._ctxService.getUser();
-        return this.usersService.releasePayload(user);
     }
 
     @Get(":id")

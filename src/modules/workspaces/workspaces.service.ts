@@ -5,14 +5,12 @@ import { CreateWorkspaceDto } from "./dto/create.workspace.dto";
 import { UpdateWorkspaceDto } from "./dto/update.workspace.dto";
 import { OBJ } from "@shared/object";
 import { User, Workspace } from "@prisma/base";
-import { ContextService } from "@providers/context/context.service";
 
 @Injectable()
 export class WorkspacesService {
     constructor(
         private _workspacesModel: WorkspacesModel,
         private _fs: WorkspacesFollowingService,
-        private _ctxService: ContextService
     ) {}
 
     /**
@@ -35,9 +33,7 @@ export class WorkspacesService {
      * @desc get all workspaces
      * @return {Workspace[]}
      */
-    getAll() {
-        const user = this._ctxService.getUser();
-
+    getAll(user: User) {
         return this._workspacesModel.getAll(user);
     }
 
@@ -45,9 +41,7 @@ export class WorkspacesService {
      * @desc create workspace
      * @return {Workspace}
      */
-    async create(workspaceDto: CreateWorkspaceDto) {
-        const user = this._ctxService.getUser();
-
+    async create(user: User, workspaceDto: CreateWorkspaceDto) {
         const workspace = await this._workspacesModel.create(
             user,
             workspaceDto

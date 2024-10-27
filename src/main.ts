@@ -4,7 +4,9 @@ import { NestFactory, Reflector } from "@nestjs/core";
 import { AppModule } from "./app.module";
 import { configSwagger } from "@common/swagger/swagger.config";
 import { TransformInterceptor } from "@interceptors/response.interceptors";
-import * as cookieParser from 'cookie-parser';
+import * as cookieParser from "cookie-parser";
+import * as session from "express-session";
+import { sessionConfig } from "@common/session/session.config";
 
 async function bootstrap() {
     const app = await NestFactory.create(AppModule, {
@@ -25,6 +27,9 @@ async function bootstrap() {
 
     // Cookie parser
     app.use(cookieParser());
+
+    // Session
+    app.use(session(sessionConfig));
 
     await app.listen(process.env.PORT);
 

@@ -7,6 +7,7 @@ import {
     Res,
     Get,
     Param,
+    Session,
 } from "@nestjs/common";
 import { Response } from "express";
 import { RegisterDto } from "./dto/register.dto";
@@ -15,7 +16,6 @@ import { AuthService } from "./auth.service";
 import { ForgotPasswordDto } from "./dto/forgotpassword.dto";
 import { ResetPasswordDto } from "./dto/resetpassword.dto";
 import { ApiTags, ApiOperation } from "@nestjs/swagger";
-import { setAuthTokenCookie } from "@common/cookie/cookie";
 import { WorkspacesService } from "@modules/workspaces/workspaces.service";
 import { UsersService } from "@modules/users/users.service";
 
@@ -23,7 +23,7 @@ import { UsersService } from "@modules/users/users.service";
 @ApiTags("auth")
 export class AuthController {
     constructor(
-        private readonly authService: AuthService,
+        private readonly _authService: AuthService,
         private readonly _workspaceService: WorkspacesService,
         private readonly _userService: UsersService
     ) {}
@@ -35,7 +35,19 @@ export class AuthController {
     })
     async register(@Body() registerDto: RegisterDto) {
         try {
-            return await this.authService.register(registerDto);
+            let user = await this._authService.register(registerDto);
+
+            // TODO: remove this logic in register - we do this logic in verify account
+            // Create default workspace if user verify success.
+            let workspace =
+                await this._workspaceService.createUserDefaultWorkspace(user);
+
+            user = await this._userService.updateCurrentWorkspace(
+                user,
+                workspace
+            );
+
+            return { user };
         } catch (error) {
             throw new HttpException(
                 error.message,
@@ -54,16 +66,41 @@ export class AuthController {
         @Res({ passthrough: true }) response: Response
     ) {
         try {
-            const { accessToken, payload } = await this.authService.login(
-                loginDto
-            );
+            const { accessToken } = await this._authService.login(loginDto);
 
-            setAuthTokenCookie(response, accessToken);
-
-            return { user: payload };
+            return { accessToken };
         } catch (error) {
             throw new HttpException(
                 error.message,
+                HttpStatus.INTERNAL_SERVER_ERROR
+            );
+        }
+    }
+
+    @Post("/logout")
+    @ApiOperation({
+        summary: "Logout user",
+        description: "Logs out the user by clearing the session.",
+    })
+    async logout(
+        @Session() session,
+        @Res({ passthrough: true }) response: Response
+    ) {
+        try {
+            // Destroy the session
+            session.destroy((err) => {
+                if (err) {
+                    throw new HttpException(
+                        "Failed to logout",
+                        HttpStatus.INTERNAL_SERVER_ERROR
+                    );
+                }
+            });
+
+            return { message: "User logged out successfully" };
+        } catch (error) {
+            throw new HttpException(
+                "Failed to logout",
                 HttpStatus.INTERNAL_SERVER_ERROR
             );
         }
@@ -76,7 +113,7 @@ export class AuthController {
     })
     async forgotPassword(@Body() forgotPasswordDto: ForgotPasswordDto) {
         try {
-            return this.authService.forgotPassword(forgotPasswordDto.email);
+            return this._authService.forgotPassword(forgotPasswordDto.email);
         } catch (error) {
             throw new HttpException(
                 error.message,
@@ -94,7 +131,7 @@ export class AuthController {
         try {
             const { resetToken, newPassword } = resetPasswordDto;
 
-            return this.authService.resetPassword(newPassword, resetToken);
+            return this._authService.resetPassword(newPassword, resetToken);
         } catch (error) {
             throw new HttpException(
                 error.message,
@@ -114,7 +151,7 @@ export class AuthController {
         @Res({ passthrough: true }) response: Response
     ) {
         try {
-            let user = await this.authService.verifyAccount(id, token);
+            let user = await this._authService.verifyAccount(id, token);
 
             // Create default workspace if user verify success.
             const workspace =
@@ -127,12 +164,9 @@ export class AuthController {
             );
 
             // Release authtoken and save to cookie
-            const { accessToken, payload } =
-                await this.authService.releaseToken(user);
+            const { accessToken } = await this._authService.releaseToken(user);
 
-            setAuthTokenCookie(response, accessToken);
-
-            return { user: payload };
+            return { accessToken };
         } catch (error) {
             throw new HttpException(
                 error.message,
