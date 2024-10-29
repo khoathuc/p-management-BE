@@ -10,6 +10,8 @@ import {
     Post,
     UploadedFile,
     Session,
+    Put,
+    Body,
 } from "@nestjs/common";
 import { ApiFile } from "@decorators/api.file.decorator";
 import { ApiOperation, ApiTags } from "@nestjs/swagger";
@@ -17,21 +19,22 @@ import { UsersService } from "./users.service";
 import { User } from "@prisma/base";
 import { ParseFile } from "@common/pipes/parse.file.pipe";
 import AuthUser from "@decorators/auth.decorator";
+import { UserPersonalInfoDto } from "./dto/update.user.settings.dto";
 
 @Controller("users")
 @ApiTags("users")
 export class UsersController {
-    constructor(private readonly usersService: UsersService) {}
+    constructor(private readonly usersService: UsersService) { }
 
     @Get("/me")
     @ApiOperation({
         summary: "Get current user",
         description: "Get current user",
     })
-    getMe(@AuthUser() user){
+    getMe(@AuthUser() user) {
         return this.usersService.releasePayload(user);
     }
-    
+
     @Get()
     @ApiOperation({
         summary: "Get all users",
@@ -55,7 +58,8 @@ export class UsersController {
     })
     async getById(@Param("id") id: string) {
         try {
-            return await this.usersService.getById(id);
+            const user = await this.usersService.getById(id);
+            return { user: this.usersService.releasePayload(user) }
         } catch (error) {
             throw new HttpException(
                 error.message,
@@ -64,21 +68,35 @@ export class UsersController {
         }
     }
 
-    @Post(":id/avatar")
+
+    @Put("/info")
+    @ApiOperation({
+        summary: "Update user personal info",
+        description: "Update user personal info by id"
+    })
+    async updateUserPersonalInfo(@Session() session, @AuthUser() authUser: User, @Body() userPersonalInfoDto: UserPersonalInfoDto) {
+        try {
+            const user = await this.usersService.updateUserPersonalInfo(authUser, userPersonalInfoDto);
+
+            //update sesssion when current user update
+            session.user = user;
+
+            return { user: this.usersService.releasePayload(user) }
+        } catch (error) {
+            throw new HttpException(
+                error.message,
+                HttpStatus.INTERNAL_SERVER_ERROR
+            );
+        }
+    }
+
+    @Post("/avatar")
     @ApiFile("avatar", true)
-    /**
-     * TODO : add user permissions.
-     */
     async uploadAvatar(
-        @Param("id") id: string,
+        @AuthUser() user: User,
         @UploadedFile(ParseFile) file: Express.Multer.File
     ) {
         try {
-            const user = await this.usersService.getById(id);
-            if (!user) {
-                throw new Error("Invalid user");
-            }
-
             return await this.usersService.uploadAvatar(user, file.path);
         } catch (error) {
             throw new HttpException(

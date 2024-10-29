@@ -4,10 +4,11 @@ import { Injectable } from "@nestjs/common";
 import { User, UserStatus, Workspace } from "@prisma/base";
 import { UsersModel } from "./users.model";
 import { OBJ } from "@shared/object";
+import { UserPersonalInfoDto } from "./dto/update.user.settings.dto";
 
 @Injectable()
 export class UsersService {
-    constructor(private _userModel: UsersModel) {}
+    constructor(private _userModel: UsersModel) { }
 
     /**
      * @desc release user payload
@@ -20,6 +21,9 @@ export class UsersService {
             "username",
             "email",
             "currentWorkspaceId",
+            "status",
+            "title",
+            "location"
         ]);
     }
 
@@ -121,5 +125,15 @@ export class UsersService {
      */
     async updateCurrentWorkspace(user: User, workspace: Workspace) {
         return await this._userModel.updateCurrentWorkspace(user, workspace);
+    }
+
+    /**
+     * @desc update current user personal info
+     * @param {User} user
+     * @param {UserPersonalInfoDto} data
+     * @returns
+     */
+    async updateUserPersonalInfo(user: User, data: UserPersonalInfoDto) {
+        return await this._userModel.updateUserPersonalInfo(user, data);
     }
 }

@@ -4,10 +4,11 @@ import { Crypt } from "@shared/crypt";
 import { RegisterDto } from "@modules/auth/dto/register.dto";
 import { User, Workspace } from "@prisma/base";
 import { UserStatus } from "@prisma/base";
+import { UserPersonalInfoDto } from "./dto/update.user.settings.dto";
 
 @Injectable()
 export class UsersModel {
-    constructor(private _prismaService: PrismaBaseService) {}
+    constructor(private _prismaService: PrismaBaseService) { }
 
     /**
      * @desc delete an user
@@ -162,5 +163,19 @@ export class UsersModel {
                 currentWorkspaceId: workspace.id,
             },
         });
+    }
+
+
+    /**
+     * @desc update user personal information
+     * @param {User} user
+     * @param {UserPersonalInfoDto} data
+     * @returns {User}
+     */
+    async updateUserPersonalInfo(user: User, data: UserPersonalInfoDto) {
+        return await this._prismaService.user.update({
+            where: { id: user.id },
+            data: { ...data }
+        })
     }
 }
